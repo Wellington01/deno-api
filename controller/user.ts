@@ -29,3 +29,19 @@ let users: Array<IUser> = [{
 const getUsers = ({ response }: { response: any }) => {
   response.body = users;
 };
+
+const getUser = (
+  { params, response }: { params: { id: string }; response: any },
+) => {
+  const user: IUser | undefined = users.find((user) => user.id === params.id);
+
+  if (user) {
+    response.status = 200;
+    response.body = user;
+  } else {
+    response.status = 404;
+    response.body = { message: "User not found." };
+  }
+};
+
+export { getUsers, getUser };
