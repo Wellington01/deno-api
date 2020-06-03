@@ -1,39 +1,18 @@
 import { IUser } from "../model/user.ts";
+import UserRepository from "../repositories/user.ts";
 
-let users: Array<IUser> = [{
-  id: "1",
-  name: "Naruto Uzumaki",
-  email: "naruto.uzumaki@viladafolha.com.br",
-  create_at: new Date("2020-05-13"),
-  update_at: new Date("2020-05-13"),
-}, {
-  id: "2",
-  name: "Uchira Sasuke",
-  email: "sasuke.uchira@akatsuki.com.br",
-  create_at: new Date("2020-05-13"),
-  update_at: new Date("2020-05-13"),
-}, {
-  id: "3",
-  name: "Monkey D. Luffy",
-  email: "monkey.d.luffy@goingmerry.com.br",
-  create_at: new Date("2020-05-13"),
-  update_at: new Date("2020-05-13"),
-}, {
-  id: "4",
-  name: "Izuku Midoriya",
-  email: "izuku.midoriya@heroes.com.br",
-  create_at: new Date("2020-05-13"),
-  update_at: new Date("2020-05-13"),
-}];
+const userRepository = new UserRepository();
 
-const getUsers = ({ response }: { response: any }) => {
+const getUsers = async ({ response }: { response: any }) => {
+  const users = await userRepository.getAll();
+
   response.body = users;
 };
 
-const getUser = (
+const getUser = async (
   { params, response }: { params: { id: string }; response: any },
 ) => {
-  const user: IUser | undefined = users.find((user) => user.id === params.id);
+  const user = await userRepository.getById(params.id);
 
   if (user) {
     response.status = 200;
@@ -50,10 +29,7 @@ const addUser = async (
   const body = await request.body();
   const user: IUser = body.value;
 
-  user.create_at = new Date();
-  user.update_at = new Date();
-
-  users.push(user);
+  userRepository.create(user);
 
   response.body = { message: "OK" };
   response.status = 200;
@@ -66,27 +42,21 @@ const updateUser = async (
     response: any;
   },
 ) => {
-  let user: IUser | undefined = users.find((user) => user.id === params.id);
+  const body = await request.body();
+  const updateUser: { name?: string; email?: string } = body.value;
+
+  const user = await userRepository.update(params.id, updateUser);
 
   if (user) {
-    const body = await request.body();
-    const updateUser: { name?: string; email?: string } = body.value;
-
-    user = { ...user, ...updateUser, update_at: new Date() };
-    users = [...users.filter((user) => user.id !== params.id), user];
-
     response.status = 200;
     response.body = { message: "OK" };
-  } else {
-    response.status = 404;
-    response.body = { message: "User not found." };
   }
 };
 
-const deleteUser = (
+const deleteUser = async (
   { params, response }: { params: { id: string }; response: any },
 ) => {
-  users = users.filter((user) => user.id !== params.id);
+  const user = await userRepository.delete(params.id);
 
   response.body = { message: "OK" };
   response.status = 200;
