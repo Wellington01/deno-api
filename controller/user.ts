@@ -27,7 +27,7 @@ const addUser = async (
   { request, response }: { request: any; response: any },
 ) => {
   const body = await request.body();
-  const user: IUser = body.value;
+  const user: IUser = await body.value;
 
   userRepository.create(user);
 
@@ -43,7 +43,7 @@ const updateUser = async (
   },
 ) => {
   const body = await request.body();
-  const updateUser: { name?: string; email?: string } = body.value;
+  const updateUser: { name?: string; email?: string } = await body.value;
 
   const user = await userRepository.update(params.id, updateUser);
 
